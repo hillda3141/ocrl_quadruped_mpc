@@ -1,17 +1,14 @@
 using Rotations, StaticArrays
 function build_walker!(vis, model::NamedTuple)
-    # model = (g = -9.81, m = 43.0, J = diagm([0.41,2.1,2.1]), l = 0.8, w = 0.3, h = 0.4, mu = 0.6)
-    l,w,h = model.l, model.w, model.h
-    # l,w,h = 0.4,0.4,0.6
+    l,w,h = 0.4,0.4,0.6
     body = mc.HyperRectangle(mc.Vec(-l/2,-w/2,0), mc.Vec(l,w,h)) 
-    body = mc.GeometryBasics.HyperRectangle(mc.Vec(-l/2,-w/2,h-0.1), mc.Vec(l, w, 0.2))
-    # body = mc.GeometryBasics.Sphere(mc.Point(0.0,0.0,0.0), 7l/16)
+    body = mc.GeometryBasics.Sphere(mc.Point(0.0,0.0,0.0), 7l/16)
     setobject!(vis["robot"]["torso"]["body"], body, MeshPhongMaterial(color=colorant"gray"))
-    # axle = mc.Cylinder(mc.Point(0.0,0.0,0.0), mc.Point(0.0,w/2,0.0), 0.03)
-    # setobject!(vis["robot"]["torso"]["Laxle"], axle, MeshPhongMaterial(color=colorant"black"))
-    # setobject!(vis["robot"]["torso"]["Raxle"], axle, MeshPhongMaterial(color=colorant"black"))
-    # settransform!(vis["robot"]["torso"]["Laxle"], mc.Translation(0,+l/4,0))
-    # settransform!(vis["robot"]["torso"]["Raxle"], mc.Translation(0,-3l/4,0))
+    axle = mc.Cylinder(mc.Point(0.0,0.0,0.0), mc.Point(0.0,w/2,0.0), 0.03)
+    setobject!(vis["robot"]["torso"]["Laxle"], axle, MeshPhongMaterial(color=colorant"black"))
+    setobject!(vis["robot"]["torso"]["Raxle"], axle, MeshPhongMaterial(color=colorant"black"))
+    settransform!(vis["robot"]["torso"]["Laxle"], mc.Translation(0,+l/4,0))
+    settransform!(vis["robot"]["torso"]["Raxle"], mc.Translation(0,-3l/4,0))
 
     flfoot = mc.HyperSphere(mc.Point(l/2,w/2,0.0), 0.03)
     frfoot = mc.HyperSphere(mc.Point(l/2,-w/2,0.0), 0.03)
@@ -95,6 +92,13 @@ function RotY_for_leg(θ)
     s, c = sincos(θ)
     [c 0 s; 0 1 0;-s 0 c]
 end
+function update_walker_pose!(vis, model::NamedTuple, x::Vector)
+    xb,yb = x[1],x[2]
+    xl,yl = x[3],x[4]
+    xr,yr = x[5],x[6]
+    settransform!(vis["robot"]["torso"], mc.Translation(xb,0,yb))
+    settransform!(vis["robot"]["Lfoot"], mc.Translation(xl,0,yl))
+    settransform!(vis["robot"]["Rfoot"], mc.Translation(xr,0,yr))
 
 function update_walker_pose!(vis, model::NamedTuple, x::Vector, u::Vector)
     xb, yb, zb = x[1], x[2], x[3] - model.h
